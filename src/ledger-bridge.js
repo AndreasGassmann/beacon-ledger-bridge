@@ -148,8 +148,8 @@ export default class BeaconLedgerBridge {
 
   async signOperation(operation, derivationPath = BeaconLedgerBridge.defaultDerivationPath) {
     const app = await this.createApp()
-    // Expect "03" or "05" prefix because it's an operation: https://github.com/obsidiansystems/ledger-app-tezos/blob/master/src/apdu_sign.c#L582
-    const result = await app.signOperation(derivationPath, operation)
+    // "03" prefix because it's an operation: https://github.com/obsidiansystems/ledger-app-tezos/blob/master/src/apdu_sign.c#L582
+    const result = await app.signOperation(derivationPath, '03' + operation)
     return result.signature
   }
 
