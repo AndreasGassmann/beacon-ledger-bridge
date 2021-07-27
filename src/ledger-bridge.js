@@ -115,10 +115,10 @@ export default class BeaconLedgerBridge {
       if (useLedgerLive) {
         try {
           await WebSocketTransport.check(BRIDGE_URL)
-          return this.transport
+          return this.app
         } catch (_err) {}
       } else {
-        return this.transport
+        return this.app
       }
     }
 
@@ -134,7 +134,10 @@ export default class BeaconLedgerBridge {
     } else {
       this.transport = await TransportU2F.create()
     }
-    return new Tezos(this.transport)
+
+    this.app = new Tezos(this.transport)
+
+    return this.app
   }
 
   async getAddress(derivationPath = BeaconLedgerBridge.defaultDerivationPath) {
@@ -163,14 +166,16 @@ export default class BeaconLedgerBridge {
   }
 
   async checkLedgerLiveTransport(i = 0) {
-    return WebSocketTransport.check(BRIDGE_URL).catch(async () => {
-      await new Promise((r) => setTimeout(r, TRANSPORT_CHECK_DELAY))
-      if (i < TRANSPORT_CHECK_LIMIT) {
-        return this.checkLedgerLiveTransport(i + 1)
-      } else {
-        throw new Error('Ledger transport check timeout')
-      }
-    })
+    return WebSocketTransport.check(BRIDGE_URL)
+      .then(() => console.log('connected!'))
+      .catch(async () => {
+        await new Promise((r) => setTimeout(r, TRANSPORT_CHECK_DELAY))
+        if (i < TRANSPORT_CHECK_LIMIT) {
+          return this.checkLedgerLiveTransport(i + 1)
+        } else {
+          throw new Error('Ledger transport check timeout')
+        }
+      })
   }
 }
 
